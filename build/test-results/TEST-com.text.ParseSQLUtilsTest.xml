@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.text.ParseSQLUtilsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2017-06-19T09:39:30" hostname="Vicheer-PC" time="0.64">
+  <properties/>
+  <testcase name="testParseQuery" classname="com.text.ParseSQLUtilsTest" time="0.001"/>
+  <testcase name="testIsValidSQL" classname="com.text.ParseSQLUtilsTest" time="0.638"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

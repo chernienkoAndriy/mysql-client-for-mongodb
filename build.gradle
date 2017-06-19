@@ -1,0 +1,38 @@
+group 'com.mev.test'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'idea'
+
+mainClassName = 'com.test.Main'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    libraries
+}
+
+jar {
+    baseName = 'gs-gradle'
+    version = '0.1.0'
+    manifest {
+        attributes(
+                'Main-Class': 'com.test.Main'
+        )
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.4.2'
+    compile files('lib/gsp.jar')
+}
+
