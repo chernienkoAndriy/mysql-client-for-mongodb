@@ -1,4 +1,4 @@
-package com.text;
+package com.test;
 
 import com.test.utils.SQLParseUtils;
 import org.junit.Test;
@@ -40,6 +40,9 @@ public class ParseSQLUtilsTest  {
         assertFalse(result.isEmpty());
 
         result = SQLParseUtils.parseSQL("select * from users limit 0, 50");
+        assertFalse(result.isEmpty());
+
+        result = SQLParseUtils.parseSQL("select adress.asf from user order by age desc, adress.asf desc limit 2,1;");
         assertFalse(result.isEmpty());
 
         result = SQLParseUtils.parseSQL("select * from users limit 0 offset 50");

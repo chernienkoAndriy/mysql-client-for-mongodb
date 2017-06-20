@@ -33,12 +33,12 @@ public class SQLParseUtils {
 
                 if (statement.getWhereClause() != null) {
                     result.put("whereClause", statement.getWhereClause().getCondition().toString());
-                    System.out.printf("\nwhere clause: \n\t%s\n", statement.getWhereClause().getCondition().toString());
+                    System.out.printf("\nwhere clause: \n\t%s\n", statement.getWhereClause().getCondition().toString().toLowerCase());
                 }
 
                 if (statement.getGroupByClause() != null) {
                     System.out.printf("\ngroup by: \n\t%s\n", statement.getGroupByClause().toString());
-                    result.put("groupBy", statement.getGroupByClause().toString());
+                    result.put("groupBy", statement.getGroupByClause().toString().toLowerCase());
                 }
 
                 if (statement.getOrderbyClause() != null) {
@@ -61,7 +61,7 @@ public class SQLParseUtils {
                 }
 
                 if (statement.getLimitClause() != null) {
-                    result.put("limitClause", statement.getLimitClause().toString());
+                    result.put("limitClause", statement.getLimitClause().toString().toLowerCase());
                     System.out.printf("top clause: \n%s\n", statement.getLimitClause().toString());
                 }
             }

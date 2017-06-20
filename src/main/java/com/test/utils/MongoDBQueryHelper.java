@@ -64,7 +64,10 @@ public class MongoDBQueryHelper {
                                                             .skip(skip)
                                                             .into(new ArrayList<>());
         } else {
-            list = (List<Document>) collection.find(filter).projection(projection).sort(sort).skip(skip).into(new ArrayList<>());
+            list = (List<Document>) collection.find(filter).projection(projection)
+                                                            .sort(sort)
+                                                            .skip(skip)
+                                                            .into(new ArrayList<>());
         }
         for (Document doc : list) {
             Main.printJson(doc);
