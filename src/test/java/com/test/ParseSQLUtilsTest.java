@@ -42,7 +42,7 @@ public class ParseSQLUtilsTest  {
         result = SQLParseUtils.parseSQL("select * from users limit 0, 50");
         assertFalse(result.isEmpty());
 
-        result = SQLParseUtils.parseSQL("select adress.asf from user order by age desc, adress.asf desc limit 2,1;");
+        result = SQLParseUtils.parseSQL("select adress.asf from user group by id order by age desc, adress.asf desc limit 2,1;");
         assertFalse(result.isEmpty());
 
         result = SQLParseUtils.parseSQL("select * from users limit 0 offset 50");
