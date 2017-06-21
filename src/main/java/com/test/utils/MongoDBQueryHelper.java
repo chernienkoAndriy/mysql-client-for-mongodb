@@ -13,30 +13,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MongoDBQueryHelper {
-    public static void find(Map<String, String> queryOptions, MongoCollection collection) {
+    public enum SkipLimitEnum {
+        SKIP,
+        LIMIT
+    }
+    public void prepareMongoQuery(Map<String, String> queryOptions, MongoCollection collection) {
         List<Document> list;
-        String[] projections = {};
-        if (!queryOptions.get("columns").trim().equals("*")) {
-            projections = queryOptions.get("columns").split(" ");
-        }
-        Bson filter = new Document();
-        if (queryOptions.containsKey("whereClause")) {
-            filter = getFilterFromClause(queryOptions.get("whereClause"));
-        }
-        Bson sort = new Document();
-        if (queryOptions.containsKey("orderBy")) {
-            String[] orderFields = queryOptions.get("orderBy").trim().split(",");
-            List<Bson> orders = new ArrayList<>();
-            for (String field : orderFields) {
-                if (field.indexOf("asc") > -1) {
-                    orders.add(Sorts.ascending(field.replaceAll("asc", "").trim()));
-                } else if (field.indexOf("desc") > -1) {
-                    orders.add(Sorts.descending(field.replaceAll("desc", "").trim()));
-                }
-            }
-            sort = Sorts.orderBy(orders);
-        }
+        String[] projections = getStrings(queryOptions);
+        Bson filter = getQueryFilter(queryOptions);
+        Bson sort = getSortDocument(queryOptions);
 
+        int skip = getLimitOrSkipValue(queryOptions, SkipLimitEnum.SKIP);
+        int limit = getLimitOrSkipValue(queryOptions, SkipLimitEnum.LIMIT);
+
+        list = getDocuments(collection, projections, filter, sort, skip, limit);
+        for (Document doc : list) {
+            Main.printJson(doc);
+        }
+    }
+
+    public int getLimitOrSkipValue(Map<String, String> queryOptions, SkipLimitEnum option){
         int skip = 0;
         int limit = 0;
         if (queryOptions.containsKey("limitClause")) {
@@ -53,28 +49,62 @@ public class MongoDBQueryHelper {
                     limit = Integer.valueOf(limitClauseArray[0].replaceAll("limit", "").trim());
                 }
             }
-            System.out.println(queryOptions.get("limitClause"));
         }
+        return option == SkipLimitEnum.LIMIT ? limit : skip;
+    }
 
+    public Bson getQueryFilter(Map<String, String> queryOptions) {
+        Bson filter = new Document();
+        if (queryOptions.containsKey("whereClause")) {
+            filter = getFilterFromClause(queryOptions.get("whereClause"));
+        }
+        return filter;
+    }
+
+    public String[] getStrings(Map<String, String> queryOptions) {
+        String[] projections = {};
+        if (!queryOptions.get("columns").trim().equals("*")) {
+            projections = queryOptions.get("columns").split(" ");
+        }
+        return projections;
+    }
+
+    public Bson getSortDocument(Map<String, String> queryOptions) {
+        Bson sort = new Document();
+        if (queryOptions.containsKey("orderBy")) {
+            String[] orderFields = queryOptions.get("orderBy").trim().split(",");
+            List<Bson> orders = new ArrayList<>();
+            for (String field : orderFields) {
+                if (field.indexOf("asc") > -1) {
+                    orders.add(Sorts.ascending(field.replaceAll("asc", "").trim()));
+                } else if (field.indexOf("desc") > -1) {
+                    orders.add(Sorts.descending(field.replaceAll("desc", "").trim()));
+                }
+            }
+            sort = Sorts.orderBy(orders);
+        }
+        return sort;
+    }
+
+    public List<Document> getDocuments(MongoCollection collection, String[] projections, Bson filter, Bson sort, int skip, int limit) {
+        List<Document> list;
         Bson projection = Projections.include(Arrays.asList(projections));
         if (limit > 0) {
             list = (List<Document>) collection.find(filter).projection(projection)
-                                                            .sort(sort)
-                                                            .limit(limit)
-                                                            .skip(skip)
-                                                            .into(new ArrayList<>());
+                    .sort(sort)
+                    .limit(limit)
+                    .skip(skip)
+                    .into(new ArrayList<>());
         } else {
             list = (List<Document>) collection.find(filter).projection(projection)
-                                                            .sort(sort)
-                                                            .skip(skip)
-                                                            .into(new ArrayList<>());
+                    .sort(sort)
+                    .skip(skip)
+                    .into(new ArrayList<>());
         }
-        for (Document doc : list) {
-            Main.printJson(doc);
-        }
+        return list;
     }
 
-    private static Bson getFilterFromClause(String whereClause) {
+    public Bson getFilterFromClause(String whereClause) {
 
         String patternString = "\\((.*\\)\\s)|\\s(\\(.*\\))";
         Pattern pattern = Pattern.compile(patternString);
@@ -83,57 +113,35 @@ public class MongoDBQueryHelper {
         List<Bson> groupedFilters = new ArrayList<>();
 
         while (matcher.find()) {
-            Bson groupFilter = null;
-
+            Bson groupFilter;
             String groupClause = whereClause.substring(matcher.start(), matcher.end()).replaceAll("[\\(\\)]", "");
             whereClause = whereClause.replace(whereClause.substring(matcher.start(), matcher.end()), String.valueOf(groupedFilters.size()));
-            System.out.println(groupClause);
-
             groupFilter = getLogicalFilter(groupClause, groupedFilters);
-
             if (groupFilter != null) {
                 groupedFilters.add(groupFilter);
             }
             matcher = pattern.matcher(whereClause);
         }
-
         return getLogicalFilter(whereClause, groupedFilters);
     }
 
-    private static Bson getLogicalFilter(String logicalClause, List<Bson> filters) {
+    public Bson getLogicalFilter(String logicalClause, List<Bson> filters) {
         logicalClause = logicalClause.replaceAll("[\\(\\)]", "");
-        String[] orLogical = logicalClause.split("or");
-        if (orLogical.length > 1) {
+        String[] orConditions = logicalClause.split("or");
+        if (orConditions.length > 1) {
             List<Bson> orList = new ArrayList<>();
-            Bson orFilter = null;
-            for (String condition : orLogical) {
-                String[] andLogical = condition.split("and");
+            Bson orFilter;
+            for (String condition : orConditions) {
+                String[] andConditions = condition.split("and");
                 List<Bson> list = new ArrayList<>();
-                if (andLogical.length > 1) {
-                    for (String andCondition : andLogical) {
-                        Bson bson = getSimpleFilter(andCondition);
-                        if (bson == null) {
-                            try {
-                                int filterIndex = Integer.valueOf(andCondition);
-                                orList.add(filters.get(filterIndex));
-                            } catch (Exception e) {
-                                bson = new Document();
-                            }
-                        }
+                if (andConditions.length > 1) {
+                    for (String andCondition : andConditions) {
+                        Bson bson = getMongoFilterFromSqlCondition(filters, orList, andCondition);
                         list.add(bson);
                     }
                     orFilter = Filters.and(list);
                 } else {
-                    Bson bson = getSimpleFilter(condition);
-                    if (bson == null) {
-                        try {
-                            int filterIndex = Integer.valueOf(condition);
-                            orList.add(filters.get(filterIndex));
-                        } catch (Exception e) {
-                            bson = new Document();
-                        }
-                    }
-                    orFilter = bson;
+                    orFilter = getMongoFilterFromSqlCondition(filters, orList, condition);
                 }
                 if (orFilter != null) {
                     orList.add(orFilter);
@@ -143,20 +151,11 @@ public class MongoDBQueryHelper {
                 return Filters.or(orList);
             }
         } else {
-            String[] andLogical = logicalClause.split("and");
-            if (andLogical.length > 1) {
+            String[] andConditions = logicalClause.split("and");
+            if (andConditions.length > 1) {
                 List<Bson> andList = new ArrayList<>();
-                for (String s : andLogical) {
-                    Bson bson = getSimpleFilter(s);
-                    if (bson == null) {
-                        try {
-                            int filterIndex = Integer.valueOf(s);
-                            bson = filters.get(filterIndex);
-                        } catch (Exception e) {
-                            bson = new Document();
-                        }
-                    }
-                    andList.add(bson);
+                for (String s : andConditions) {
+                    getMongoFilterFromSqlCondition(filters, andList, s);
                 }
                 return Filters.and(andList);
             } else {
@@ -166,7 +165,20 @@ public class MongoDBQueryHelper {
         return getSimpleFilter(logicalClause);
     }
 
-    private static Bson getSimpleFilter(String clause) {
+    public Bson getMongoFilterFromSqlCondition(List<Bson> filters, List<Bson> list, String condition) {
+        Bson bson = getSimpleFilter(condition);
+        if (bson == null) {
+            try {
+                int filterIndex = Integer.valueOf(condition);
+                list.add(filters.get(filterIndex));
+            } catch (Exception e) {
+                bson = new Document();
+            }
+        }
+        return bson;
+    }
+
+    public Bson getSimpleFilter(String clause) {
         String[] result = clause.split("<=");
         if (result.length > 1) {
             return Filters.lte(result[0].trim(), result[1].trim());
