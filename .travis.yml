@@ -8,4 +8,5 @@ branches:
 
 before_install:
  - chmod +x gradlew
-sccript: gradle build
+sccript:  - gradle test
+          - gradle build
