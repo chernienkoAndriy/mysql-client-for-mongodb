@@ -133,11 +133,10 @@ public class MongoDBQueryHelper {
             Bson orFilter;
             for (String condition : orConditions) {
                 String[] andConditions = condition.split("and");
-                List<Bson> list = new ArrayList<>();
                 if (andConditions.length > 1) {
+                    List<Bson> list = new ArrayList<>();
                     for (String andCondition : andConditions) {
-                        Bson bson = getMongoFilterFromSqlCondition(filters, orList, andCondition);
-                        list.add(bson);
+                        getMongoFilterFromSqlCondition(filters, list, andCondition);
                     }
                     orFilter = Filters.and(list);
                 } else {
