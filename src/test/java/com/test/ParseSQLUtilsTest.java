@@ -31,7 +31,7 @@ public class ParseSQLUtilsTest  {
     public void testParseQuery() {
         Map result;
         result = SQLParseUtils.parseSQL(" select id, email from users where user.id=3;");
-        assertFalse(result.isEmpty());
+        assertTrue(result.isEmpty());
 
         result = SQLParseUtils.parseSQL(" select * fom users;");
         assertTrue(result.isEmpty());
