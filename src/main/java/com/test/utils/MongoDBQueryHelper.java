@@ -19,7 +19,7 @@ public class MongoDBQueryHelper {
     }
     public void prepareMongoQuery(Map<String, String> queryOptions, MongoCollection collection) {
         List<Document> list;
-        String[] projections = getStrings(queryOptions);
+        String[] projections = getFields(queryOptions);
         Bson filter = getQueryFilter(queryOptions);
         Bson sort = getSortDocument(queryOptions);
 
@@ -61,7 +61,7 @@ public class MongoDBQueryHelper {
         return filter;
     }
 
-    public String[] getStrings(Map<String, String> queryOptions) {
+    public String[] getFields(Map<String, String> queryOptions) {
         String[] projections = {};
         if (!queryOptions.get("columns").trim().equals("*")) {
             projections = queryOptions.get("columns").split(" ");
