@@ -27,8 +27,12 @@ public class MongoDBQueryHelper {
         int limit = getLimitOrSkipValue(queryOptions, SkipLimitEnum.LIMIT);
 
         list = getDocuments(collection, projections, filter, sort, skip, limit);
-        for (Document doc : list) {
-            Main.printJson(doc);
+        if (list.size() > 0) {
+            for (Document doc : list) {
+                Main.printJson(doc);
+            }
+        } else {
+            System.out.println("Nothing found;");
         }
     }
 

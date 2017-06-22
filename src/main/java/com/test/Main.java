@@ -20,12 +20,21 @@ public class Main {
 
 
     public static void main(String[] args) {
-        MongoClient client = new MongoClient();
-        MongoDatabase db = client.getDatabase("users");
-        if (args.length > 0) {
-            System.out.println(args[0]);
+        MongoClient client = new MongoClient(parseDbURL(args));
+        MongoDatabase db = null;
+        try {
+            if (args.length > 0) {
+                System.out.println(args[0]);
+            }
+            db = client.getDatabase(parseDbName(args));
+            client.getAddress();
+            readFromConsole(db);
+        } catch (Exception e) {
+            client.close();
+            System.out.println("Cant't connect to db");
+            System.exit(1);
         }
-        readFromConsole(db);
+
     }
 
     public static void printJson(Document document) {
@@ -42,14 +51,49 @@ public class Main {
             if(string.equals("exit")){
                 break;
             } else {
-                Map<String, String> options = SQLParseUtils.parseSQL(string);
-                String table = options.get("table");
-                if (table != null) {
-                    MongoCollection collection = db.getCollection(table);
-                    MongoDBQueryHelper helper = new MongoDBQueryHelper();
-                    helper.prepareMongoQuery(options, collection);
+                if(string.toLowerCase().startsWith("select")){
+                    Map<String, String> options = SQLParseUtils.parseSQL(string);
+                    String table = options.get("table");
+                    if (table != null) {
+                        MongoCollection collection = db.getCollection(table);
+                        MongoDBQueryHelper helper = new MongoDBQueryHelper();
+                        helper.prepareMongoQuery(options, collection);
+                    }
+                } else {
+                    System.out.println("'select' feature implemented only");
+                }
+
+            }
+        }
+    }
+
+    static String parseDbURL(String[] args) {
+        String local = "localhost:27017";
+        if (args.length > 0) {
+            for (String argument : args) {
+                String[] arr = argument.split("=");
+                if (arr.length == 2) {
+                    if (arr[0].equals("dbUrl")) {
+                        return arr[1];
+                    }
                 }
             }
         }
+        return local;
+    }
+
+    static String parseDbName(String[] args) {
+        String test = "test";
+        if (args.length > 0) {
+            for (String argument : args) {
+                String[] arr = argument.split("=");
+                if (arr.length == 2) {
+                    if (arr[0].equals("dbName")) {
+                        return arr[1];
+                    }
+                }
+            }
+        }
+        return test;
     }
 }
