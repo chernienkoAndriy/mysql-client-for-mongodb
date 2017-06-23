@@ -1,4 +1,4 @@
-# mysqlclientformongodb
+# mysql client for mongodb
 
 This is CLI that use mysql syntax to work with mongoDb.
 
