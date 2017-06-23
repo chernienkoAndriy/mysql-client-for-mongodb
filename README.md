@@ -4,7 +4,7 @@ This is CLI that use mysql syntax to work with mongoDb.
 
 You need to have gradle installed on your machine.
 
-You need download it using command ```git clone https://github.com/chernienkoAndriy/mysql-client-for-mongodb```
+You can download archive and unzip it.
 
 After project is loaded , you need navigate into root directory and run "gradle build"
 
