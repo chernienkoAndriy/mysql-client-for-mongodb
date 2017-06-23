@@ -1,0 +1,170 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: SQLParseUtils</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.test.utils</a> ]
+</div>
+
+<h1>Coverage Summary for Class: SQLParseUtils (com.test.utils)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SQLParseUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (8/ 9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,8%
+  </span>
+  <span class="absValue">
+    (45/ 46)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.test.utils;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import gudusoft.gsqlparser.EDbVendor;
+<i>4</i>&nbsp;import gudusoft.gsqlparser.TGSqlParser;
+<i>5</i>&nbsp;import gudusoft.gsqlparser.nodes.*;
+<i>6</i>&nbsp;import gudusoft.gsqlparser.stmt.TSelectSqlStatement;
+<i>7</i>&nbsp;
+<i>8</i>&nbsp;import java.util.Collections;
+<i>9</i>&nbsp;import java.util.HashMap;
+<i>10</i>&nbsp;import java.util.Map;
+<i>11</i>&nbsp;
+<b class="nc"><i>12</i>&nbsp;public class SQLParseUtils {</b>
+<b class="fc"><i>13</i>&nbsp;    private static TGSqlParser parser = new TGSqlParser(EDbVendor.dbvmysql);</b>
+<i>14</i>&nbsp;
+<i>15</i>&nbsp;    public static Map&lt;String, String&gt; parseSQL(String query) {
+<b class="fc"><i>16</i>&nbsp;        Map&lt;String, String&gt; result = new HashMap&lt;&gt;();</b>
+<b class="fc"><i>17</i>&nbsp;        parser.sqltext = query;</b>
+<b class="fc"><i>18</i>&nbsp;        int ret = parser.parse();</b>
+<b class="fc"><i>19</i>&nbsp;        result.put(&quot;table&quot;, &quot;&quot;);</b>
+<b class="fc"><i>20</i>&nbsp;        if (ret == 0) {</b>
+<b class="fc"><i>21</i>&nbsp;            for (int i = 0; i &lt; parser.sqlstatements.size(); i++) {</b>
+<b class="fc"><i>22</i>&nbsp;                TSelectSqlStatement statement = (TSelectSqlStatement) parser.sqlstatements.get(i);</b>
+<b class="fc"><i>23</i>&nbsp;                TResultColumnList resultColumnList = statement.getResultColumnList();</b>
+<i>24</i>&nbsp;
+<b class="fc"><i>25</i>&nbsp;                result.put(&quot;table&quot;, statement.getTables().getTable(0).getFullName());</b>
+<b class="fc"><i>26</i>&nbsp;                getColumns(result, resultColumnList);</b>
+<b class="fc"><i>27</i>&nbsp;                getWhereClause(result, statement);</b>
+<b class="fc"><i>28</i>&nbsp;                getGroupByClause(result, statement);</b>
+<b class="fc"><i>29</i>&nbsp;                getOrderbyClause(result, statement);</b>
+<b class="fc"><i>30</i>&nbsp;                getLimitClause(result, statement);</b>
+<i>31</i>&nbsp;            }
+<i>32</i>&nbsp;        } else {
+<b class="fc"><i>33</i>&nbsp;            System.out.println(parser.getErrormessage());</b>
+<b class="fc"><i>34</i>&nbsp;            return Collections.emptyMap();</b>
+<i>35</i>&nbsp;        }
+<i>36</i>&nbsp;
+<b class="fc"><i>37</i>&nbsp;        return result;</b>
+<i>38</i>&nbsp;    }
+<i>39</i>&nbsp;
+<i>40</i>&nbsp;    private static void getColumns(Map&lt;String, String&gt; result, TResultColumnList resultColumnList) {
+<b class="fc"><i>41</i>&nbsp;        result.put(&quot;columns&quot;, &quot;&quot;);</b>
+<b class="fc"><i>42</i>&nbsp;        for (int j = 0; j &lt; resultColumnList.size(); j++) {</b>
+<b class="fc"><i>43</i>&nbsp;            TResultColumn resultColumn = resultColumnList.getResultColumn(j);</b>
+<b class="fc"><i>44</i>&nbsp;            String columns = result.get(&quot;columns&quot;);</b>
+<b class="fc"><i>45</i>&nbsp;            result.put(&quot;columns&quot;, columns + &quot; &quot; + resultColumn.getExpr().toString());</b>
+<i>46</i>&nbsp;        }
+<b class="fc"><i>47</i>&nbsp;    }</b>
+<i>48</i>&nbsp;
+<i>49</i>&nbsp;    private static void getWhereClause(Map&lt;String, String&gt; result, TSelectSqlStatement statement) {
+<b class="fc"><i>50</i>&nbsp;        if (statement.getWhereClause() != null) {</b>
+<b class="fc"><i>51</i>&nbsp;            result.put(&quot;whereClause&quot;, statement.getWhereClause().getCondition().toString());</b>
+<i>52</i>&nbsp;        }
+<b class="fc"><i>53</i>&nbsp;    }</b>
+<i>54</i>&nbsp;
+<i>55</i>&nbsp;    private static void getGroupByClause(Map&lt;String, String&gt; result, TSelectSqlStatement statement) {
+<b class="fc"><i>56</i>&nbsp;        if (statement.getGroupByClause() != null) {</b>
+<b class="fc"><i>57</i>&nbsp;            result.put(&quot;groupBy&quot;, statement.getGroupByClause().toString().toLowerCase());</b>
+<i>58</i>&nbsp;        }
+<b class="fc"><i>59</i>&nbsp;    }</b>
+<i>60</i>&nbsp;
+<i>61</i>&nbsp;    private static void getOrderbyClause(Map&lt;String, String&gt; result, TSelectSqlStatement statement) {
+<b class="fc"><i>62</i>&nbsp;        if (statement.getOrderbyClause() != null) {</b>
+<b class="fc"><i>63</i>&nbsp;            result.put(&quot;orderBy&quot;, &quot;&quot;);</b>
+<b class="fc"><i>64</i>&nbsp;            String stringSeparator = &quot;,&quot;;</b>
+<b class="fc"><i>65</i>&nbsp;            for (int j = 0; j &lt; statement.getOrderbyClause().getItems().size(); j++) {</b>
+<b class="fc"><i>66</i>&nbsp;                String orderBy = result.get(&quot;orderBy&quot;);</b>
+<b class="fc"><i>67</i>&nbsp;                if ((statement.getOrderbyClause().getItems().size() - 1) == j) {</b>
+<b class="fc"><i>68</i>&nbsp;                    stringSeparator = &quot;&quot;;</b>
+<i>69</i>&nbsp;                }
+<b class="fc"><i>70</i>&nbsp;                result.put(&quot;orderBy&quot;, orderBy + &quot; &quot; + statement.getOrderbyClause().getItems().getOrderByItem(j).toString() + stringSeparator);</b>
+<i>71</i>&nbsp;            }
+<i>72</i>&nbsp;        }
+<b class="fc"><i>73</i>&nbsp;    }</b>
+<i>74</i>&nbsp;
+<i>75</i>&nbsp;    private static void getLimitClause(Map&lt;String, String&gt; result, TSelectSqlStatement statement) {
+<b class="fc"><i>76</i>&nbsp;        if (statement.getLimitClause() != null) {</b>
+<b class="fc"><i>77</i>&nbsp;            result.put(&quot;limitClause&quot;, statement.getLimitClause().toString().toLowerCase());</b>
+<i>78</i>&nbsp;        }
+<b class="fc"><i>79</i>&nbsp;    }</b>
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;    public static Boolean isValidSQL(String query) {
+<b class="fc"><i>82</i>&nbsp;        parser.sqltext = query;</b>
+<b class="fc"><i>83</i>&nbsp;        int ret = parser.parse();</b>
+<b class="fc"><i>84</i>&nbsp;        return ret == 0;</b>
+<i>85</i>&nbsp;    }
+<i>86</i>&nbsp;
+<i>87</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2017-06-23 10:26</div>
+</div>
+</body>
+</html>
