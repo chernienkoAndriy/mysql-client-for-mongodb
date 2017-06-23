@@ -15,3 +15,5 @@ To run it you need specify in terminal ```java -jar mysql-mongo-0.1.0.jar dbUrl=
 dbUrl - is url to your mongoDb, it not specified app will try to connect to localhost:27017.
 
 dbName - is name of database to work with. If not specified, app will work with 'test' db.
+
+To run tests you need run "gradle test" commnad;
