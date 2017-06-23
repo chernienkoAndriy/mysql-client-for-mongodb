@@ -86,7 +86,7 @@ public class Main {
     }
 
     static String parseDbName(String[] args) {
-        String test = "users";
+        String test = "test";
         if (args.length > 0) {
             for (String argument : args) {
                 String[] arr = argument.split("=");
