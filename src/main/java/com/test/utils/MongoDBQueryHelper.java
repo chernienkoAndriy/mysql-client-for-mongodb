@@ -184,28 +184,36 @@ public class MongoDBQueryHelper {
     public Bson getSimpleFilter(String clause) {
         String[] result = clause.split("<=");
         if (result.length > 1) {
-            return Filters.lte(result[0].trim(), result[1].trim());
+            return Filters.lte(result[0].trim(), getNumberValue(result[1].trim()));
         }
         result = clause.split("<>");
         if (result.length > 1) {
-            return Filters.ne(result[0].trim(), result[1].trim());
+            return Filters.ne(result[0].trim(), getNumberValue(result[1].trim()));
         }
         result = clause.split(">=");
         if (result.length > 1) {
-            return Filters.gte(result[0].trim(), result[1].trim());
+            return Filters.gte(result[0].trim(), getNumberValue(result[1].trim()));
         }
         result = clause.split("=");
         if (result.length > 1) {
-            return Filters.eq(result[0].trim(), result[1].trim());
+            return Filters.eq(result[0].trim(), getNumberValue(result[1].trim()));
         }
         result = clause.split(">");
         if (result.length > 1) {
-            return Filters.gt(result[0].trim(), result[1].trim());
+            return Filters.gt(result[0].trim(), getNumberValue(result[1].trim()));
         }
         result = clause.split("<");
         if (result.length > 1) {
-            return Filters.lt(result[0].trim(), result[1].trim());
+            return Filters.lt(result[0].trim(), getNumberValue(result[1].trim()));
         }
         return null;
+    }
+
+    private Object getNumberValue(String value) {
+        try{
+            return Double.valueOf(value);
+        } catch (Exception e) {
+            return value;
+        }
     }
 }

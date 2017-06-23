@@ -48,21 +48,24 @@ public class Main {
         Scanner in = new Scanner(System.in);
         while (true) {
             String string = in.nextLine();
-            if(string.equals("exit")){
+            if (string.equals("exit")) {
                 break;
             } else {
-                if(string.toLowerCase().startsWith("select")){
-                    Map<String, String> options = SQLParseUtils.parseSQL(string);
-                    String table = options.get("table");
-                    if (table != null) {
-                        MongoCollection collection = db.getCollection(table);
-                        MongoDBQueryHelper helper = new MongoDBQueryHelper();
-                        helper.prepareMongoQuery(options, collection);
+                if (SQLParseUtils.isValidSQL(string)) {
+                    if (string.toLowerCase().startsWith("select")) {
+                        Map<String, String> options = SQLParseUtils.parseSQL(string);
+                        String table = options.get("table");
+                        if (table != null) {
+                            MongoCollection collection = db.getCollection(table);
+                            MongoDBQueryHelper helper = new MongoDBQueryHelper();
+                            helper.prepareMongoQuery(options, collection);
+                        }
+                    } else {
+                        System.out.println("'select' feature implemented only");
                     }
                 } else {
-                    System.out.println("'select' feature implemented only");
+                    System.out.println("SQL is not valid;");
                 }
-
             }
         }
     }
@@ -83,7 +86,7 @@ public class Main {
     }
 
     static String parseDbName(String[] args) {
-        String test = "test";
+        String test = "users";
         if (args.length > 0) {
             for (String argument : args) {
                 String[] arr = argument.split("=");
